@@ -73,6 +73,7 @@ class Regressor:
         self.model_config = read_json_as_dict(paths.MODEL_CONFIG_FILE_PATH)
         keys_to_remove = {'seed_value', 'prediction_field_name'}
         self.settings = {k: v for k, v in self.model_config.items() if k not in keys_to_remove}
+        self.settings["seed"] = self.model_config["seed_value"]
 
         self.predictor = AutoML()
 
