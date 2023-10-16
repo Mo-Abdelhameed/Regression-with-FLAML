@@ -1,0 +1,8 @@
+{
+  "seed_value": 123,
+  "prediction_field_name": "prediction",
+  "time_budget": 60,
+  "metric": "mse",
+  "task": "regression",
+  "log_file_name": "flaml_log.log"
+}
