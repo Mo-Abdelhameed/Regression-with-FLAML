@@ -4,7 +4,12 @@ from config import paths
 from logger import get_logger
 from Regressor import Regressor, predict_with_model
 from schema.data_schema import load_saved_schema
-from utils import read_csv_in_directory, save_dataframe_as_csv, read_json_as_dict, set_seeds
+from utils import (
+    read_csv_in_directory,
+    save_dataframe_as_csv,
+    read_json_as_dict,
+    set_seeds,
+)
 
 logger = get_logger(task_name="predict")
 
@@ -40,11 +45,15 @@ def run_batch_predictions(
 
     logger.info("Making predictions...")
     predictions_arr = predict_with_model(model, x_test)
-    predictions_df = pd.DataFrame({data_schema.id: ids, model_config["prediction_field_name"]: predictions_arr})
+    predictions_df = pd.DataFrame(
+        {data_schema.id: ids, model_config["prediction_field_name"]: predictions_arr}
+    )
 
     logger.info("Saving predictions...")
     save_dataframe_as_csv(dataframe=predictions_df, file_path=predictions_file_path)
     logger.info("Batch predictions completed successfully")
+    print("Used model:", model.predictor.best_estimator)
+    print("Model parameters:", model.predictor.best_config)
 
 
 if __name__ == "__main__":
