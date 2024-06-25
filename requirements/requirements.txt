@@ -8,3 +8,4 @@ flaml==2.1.1
 lightgbm==3.3.5
 xgboost==2.0.0
 scipy==1.9.1
+psutil==5.9.8

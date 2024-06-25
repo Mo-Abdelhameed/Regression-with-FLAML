@@ -9,6 +9,7 @@ from utils import (
     save_dataframe_as_csv,
     read_json_as_dict,
     set_seeds,
+    ResourceTracker
 )
 
 logger = get_logger(task_name="predict")
@@ -31,23 +32,23 @@ def run_batch_predictions(
     and saves the predictions as a CSV file.
     """
     set_seeds(seed_value=123)
+    with ResourceTracker(logger, monitoring_interval=0.1):
+        model_config = read_json_as_dict(paths.MODEL_CONFIG_FILE_PATH)
+        x_test = read_csv_in_directory(test_dir)
+        data_schema = load_saved_schema(saved_schema_dir)
+        ids = x_test[data_schema.id]
+        x_test.drop(columns=data_schema.id, inplace=True)
 
-    model_config = read_json_as_dict(paths.MODEL_CONFIG_FILE_PATH)
-    x_test = read_csv_in_directory(test_dir)
-    data_schema = load_saved_schema(saved_schema_dir)
-    ids = x_test[data_schema.id]
-    x_test.drop(columns=data_schema.id, inplace=True)
+        for column in data_schema.categorical_features:
+            x_test[column] = x_test[column].astype(str)
 
-    for column in data_schema.categorical_features:
-        x_test[column] = x_test[column].astype(str)
+        model = Regressor.load(predictor_dir)
 
-    model = Regressor.load(predictor_dir)
-
-    logger.info("Making predictions...")
-    predictions_arr = predict_with_model(model, x_test)
-    predictions_df = pd.DataFrame(
-        {data_schema.id: ids, model_config["prediction_field_name"]: predictions_arr}
-    )
+        logger.info("Making predictions...")
+        predictions_arr = predict_with_model(model, x_test)
+        predictions_df = pd.DataFrame(
+            {data_schema.id: ids, model_config["prediction_field_name"]: predictions_arr}
+        )
 
     logger.info("Saving predictions...")
     save_dataframe_as_csv(dataframe=predictions_df, file_path=predictions_file_path)
